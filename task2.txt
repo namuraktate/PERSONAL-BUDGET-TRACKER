@@ -1,0 +1,84 @@
+import csv
+
+# Initialize budget variables
+income = 0
+expenses = 0
+expenses_by_category = {}
+transactions = []
+
+# Load transactions from a CSV file if it exists
+try:
+    with open('budget_data.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            category, amount, transaction_type = row
+            amount = float(amount)
+            transactions.append((category, amount, transaction_type))
+            if transaction_type.lower() == 'income':
+                income += amount
+            elif transaction_type.lower() == 'expense':
+                expenses += amount
+                if category in expenses_by_category:
+                    expenses_by_category[category] += amount
+                else:
+                    expenses_by_category[category] = amount
+except FileNotFoundError:
+    pass
+
+
+# Function to add a transaction
+def add_transaction():
+    category = input("Enter category: ")
+    amount = float(input("Enter amount: "))
+    transaction_type = input("Is this an income or expense? ").lower()
+    transactions.append((category, amount, transaction_type))
+
+    if transaction_type == 'income':
+        global income
+        income += amount
+    elif transaction_type == 'expense':
+        global expenses
+        expenses += amount
+        if category in expenses_by_category:
+            expenses_by_category[category] += amount
+        else:
+            expenses_by_category[category] = amount
+
+    # Save the transaction to the CSV file
+    with open('budget_data.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([category, amount, transaction_type])
+
+
+# Function to calculate remaining budget
+def calculate_remaining_budget():
+    return income - expenses
+
+
+# Function to display expense analysis
+def display_expense_analysis():
+    print("Expense Analysis:")
+    for category, amount in expenses_by_category.items():
+        print(f"{category}: {amount}")
+
+
+# Main loop
+while True:
+    print("\nOptions:")
+    print("1. Add Transaction")
+    print("2. View Remaining Budget")
+    print("3. Expense Analysis")
+    print("4. Quit")
+    choice = input("Enter your choice: ")
+
+    if choice == '1':
+        add_transaction()
+    elif choice == '2':
+        remaining_budget = calculate_remaining_budget()
+        print(f"Remaining Budget: {remaining_budget}")
+    elif choice == '3':
+        display_expense_analysis()
+    elif choice == '4':
+        break
+    else:
+        print("Invalid choice. Please try again.")
